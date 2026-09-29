@@ -25,7 +25,7 @@ function violationText(v: unknown): string {
 export function DispatchMenu({ bead }: { bead: Bead }) {
   // Only query MC once the menu has been opened; a live Krewe run then keeps polling.
   const [touched, setTouched] = React.useState(false);
-  const { data } = useDispatchStatus(bead.id, touched);
+  const { data, isError, error } = useDispatchStatus(bead.id, touched);
   const dispatch = useDispatch();
   // `dispatch.data` is the last result; only an omg-build result carries sessionName.
   const session = dispatch.data?.sessionName ? dispatch.data : null;
@@ -43,7 +43,11 @@ export function DispatchMenu({ bead }: { bead: Bead }) {
         <Icon name="rocket" size={15} />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[300px]">
-        {!data ? (
+        {isError ? (
+          <DropdownMenuItem disabled>
+            Couldn&apos;t load dispatch options{error instanceof Error && error.message ? `: ${error.message}` : "."}
+          </DropdownMenuItem>
+        ) : !data ? (
           <DropdownMenuItem disabled>Loading…</DropdownMenuItem>
         ) : !data.configured ? (
           <DropdownMenuItem disabled>Dispatch unavailable: MC token not configured</DropdownMenuItem>
