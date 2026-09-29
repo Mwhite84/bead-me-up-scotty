@@ -270,7 +270,9 @@ export function useDispatchFor(projectId: string) {
     mutationToast<{ id: string; target: DispatchTarget }, DispatchResult>(
       ({ id, target }) => api.dispatch(projectId, id, target),
       (a, res) =>
-        a.target === "omg-build" ? `Started omg-build session ${res.sessionName}` : "Krewe run started",
+        a.target === "omg-build"
+          ? `Started omg-build session ${res.sessionName}${res.warning ? ` · ${res.warning}` : ""}`
+          : "Krewe run started",
       qc,
       ["dispatch", projectId],
     ),

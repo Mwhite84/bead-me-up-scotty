@@ -55,6 +55,7 @@ export function DispatchMenu({ bead }: { bead: Bead }) {
           <>
             <DropdownMenuItem
               className="flex-col items-start"
+              disabled={dispatch.isPending}
               onClick={() => dispatch.mutate({ id: bead.id, target: "omg-build" })}
             >
               <span className="font-medium">Build with omg-build</span>
@@ -65,7 +66,7 @@ export function DispatchMenu({ bead }: { bead: Bead }) {
             </DropdownMenuItem>
             <DropdownMenuItem
               className="flex-col items-start"
-              disabled={!data.krewe.eligible}
+              disabled={dispatch.isPending || !data.krewe.eligible}
               onClick={() => dispatch.mutate({ id: bead.id, target: "krewe" })}
             >
               <span className="font-medium">{data.isEpic ? "Run epic on Krewe" : "Run on Krewe"}</span>
