@@ -29,6 +29,12 @@ export function BoardScreen() {
   const [query, setQuery] = React.useState<string | null>(null); // null = search closed
 
   const readOnly = data?.meta.readOnly ?? false;
+  // Shown in the empty-lane state too, so the mode is explained whichever lane is selected.
+  const readOnlyHint = readOnly && (
+    <p className="flex items-center justify-center gap-1.5 py-3 text-[12px] text-text-3">
+      <Svg size={14} color="var(--text-3)"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></Svg>Swipe actions and the composer are off
+    </p>
+  );
   const { byLane, counts, total, index } = React.useMemo(() => {
     const beads = (data?.beads ?? []).filter((b) => !(b.labels ?? []).includes(ARCHIVED_LABEL));
     const index = new Map((data?.beads ?? []).map((b) => [b.id, b]));
@@ -76,7 +82,10 @@ export function BoardScreen() {
       <LaneChips counts={counts} selected={lane} onSelect={setLane} />
 
       {cards.length === 0 && !q ? (
-        <EmptyLaneState lane={lane} counts={counts} onSelect={setLane} />
+        <>
+          <EmptyLaneState lane={lane} counts={counts} onSelect={setLane} />
+          {readOnlyHint}
+        </>
       ) : (
         <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto overflow-x-hidden px-4 pb-24">
           {cards.length === 0 && <p className="py-10 text-center text-sm text-text-3">No matches in {lane.replace("_", " ")}.</p>}
@@ -89,11 +98,7 @@ export function BoardScreen() {
               </SwipeCard>
             );
           })}
-          {readOnly && (
-            <p className="flex items-center justify-center gap-1.5 py-3 text-[12px] text-text-3">
-              <Svg size={14} color="var(--text-3)"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></Svg>Swipe actions and the composer are off
-            </p>
-          )}
+          {readOnlyHint}
         </div>
       )}
 
