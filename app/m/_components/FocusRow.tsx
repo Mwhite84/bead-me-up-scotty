@@ -22,7 +22,7 @@ const Count = ({ n, children }: { n: number; children: React.ReactNode }) => (
 
 /** Compact Focus row: status dot, title, id + priority + counts, assignee avatar. Links to the Detail screen. */
 export function FocusRow({ bead, kind, href }: { bead: Bead; kind: FocusKind; href: string }) {
-  const deps = bead.dependency_count ?? 0;
+  const deps = bead.dependency_count ?? bead.dependencies?.length ?? 0;
   const comments = bead.comment_count ?? bead.comments.length;
   return (
     <Link href={href} className="flex min-h-14 items-center gap-2.5 rounded-xl border border-border bg-surface px-3 py-2.5">

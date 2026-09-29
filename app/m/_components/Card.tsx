@@ -21,7 +21,7 @@ const Count = ({ n, children }: { n: number; children: React.ReactNode }) => (
 export function Card({
   bead, status, epic, origin,
 }: { bead: Bead; status?: StatusKey; epic?: string; origin?: "human" | "agent" }) {
-  const deps = bead.dependency_count ?? 0;
+  const deps = bead.dependency_count ?? bead.dependencies?.length ?? 0;
   const comments = bead.comment_count ?? bead.comments.length;
   return (
     <div className="flex flex-col gap-2 rounded-[14px] border border-border bg-surface px-3.5 py-3 shadow-[var(--shadow)]">
