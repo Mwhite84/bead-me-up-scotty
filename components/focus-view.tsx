@@ -3,7 +3,8 @@ import * as React from "react";
 import { useApp } from "@/components/app-context";
 import { Icon, typeIconName } from "@/components/icons";
 import { PriorityChip } from "@/components/board/bead-card";
-import { isBlocked, blockingDeps, relTime, fmtDateTime, typeColor, catColor } from "@/lib/beads-view";
+import { blockingDeps, relTime, fmtDateTime, typeColor, catColor } from "@/lib/beads-view";
+import { ARCHIVED, RECENT_LIMIT, assigneeGroups, completionDate, focusBuckets, laneOf, type FocusColumn } from "@/lib/focus";
 import type { Bead } from "@/lib/schema";
 
 /**
@@ -23,51 +24,6 @@ import type { Bead } from "@/lib/schema";
  * "show me this lane's now". Unset → no chips.
  */
 
-const ARCHIVED = "archived";
-const RECENT_LIMIT = 7;
-type FocusColumn = { id: string; title: string; hint: string; items: Bead[] };
-
-function completionDate(bead: Bead): string | undefined {
-  // Invalid/missing completion dates fall back to the last known update.
-  const closed = Date.parse(bead.closed_at || "");
-  if (Number.isFinite(closed)) return bead.closed_at || undefined;
-  const updated = Date.parse(bead.updated_at || "");
-  return Number.isFinite(updated) ? bead.updated_at : undefined;
-}
-
-function completionTime(bead: Bead): number {
-  return Date.parse(completionDate(bead) || "") || 0;
-}
-
-function assigneeKey(bead: Bead): string {
-  // Prefix real names so no name can collide with the blank-assignee sentinel.
-  return bead.assignee?.trim() ? `person:${bead.assignee.trim()}` : "none";
-}
-
-function assigneeGroups(columns: FocusColumn[]) {
-  const groups = new Map<string, { key: string; label: string; columns: FocusColumn[]; active: boolean }>();
-  for (const [columnIndex, column] of columns.entries()) {
-    for (const bead of column.items) {
-      const key = assigneeKey(bead);
-      let group = groups.get(key);
-      if (!group) {
-        group = { key, label: bead.assignee?.trim() || "No assignee",
-          columns: columns.map(c => ({ ...c, items: [] })), active: false };
-        groups.set(key, group);
-      }
-      group.columns[columnIndex].items.push(bead);
-      group.active ||= column.id === "flight";
-    }
-  }
-  return [...groups.values()].sort((a, b) =>
-    Number(a.key === "none") - Number(b.key === "none") ||
-    Number(b.active) - Number(a.active) || a.label.localeCompare(b.label) || a.key.localeCompare(b.key));
-}
-
-function laneOf(b: Bead, prefix: string): string | null {
-  const l = (b.labels ?? []).find((x) => x.startsWith(prefix));
-  return l ? l.slice(prefix.length) : null;
-}
 
 export function FocusView() {
   const { beads, index, meta } = useApp();
@@ -106,24 +62,10 @@ export function FocusView() {
     [prefix, selectedLane],
   );
 
-  const inFlight = React.useMemo(
-    () => active.filter((b) => (b.status === "in_progress" || b.status === "hooked") && inLane(b)),
-    [active, inLane],
-  );
-  const blocked = React.useMemo(
-    () => active.filter((b) => isBlocked(b, index) && inLane(b)),
+  const { inFlight, blocked, nextUp, recentlyFinished } = React.useMemo(
+    () => focusBuckets(active, index, inLane),
     [active, index, inLane],
   );
-  const nextUp = React.useMemo(
-    () =>
-      active.filter(
-        (b) => b.status === "open" && b.priority <= 1 && !isBlocked(b, index) && inLane(b),
-      ),
-    [active, index, inLane],
-  );
-
-  const recentlyFinished = active.filter(b => b.status === "closed" && inLane(b))
-    .sort((a, b) => completionTime(b) - completionTime(a) || a.id.localeCompare(b.id));
   const recentItems = showAllRecent ? recentlyFinished : recentlyFinished.slice(0, RECENT_LIMIT);
   const columns: FocusColumn[] = [
     { id: "flight", title: "In flight", hint: "in progress or hooked", items: inFlight },

@@ -62,7 +62,7 @@ try {
   await banner.waitFor({ state: "detached" });
   await sibling.getByRole("button", { name: "Read Only Mode", exact: true }).waitFor({ state: "detached" });
   const cookie = (await context.cookies()).find((c) => c.name === "scotty-viewer-mode");
-  assert.equal(cookie.expires, -1, "Editing preference must use a session cookie");
+  assert.ok(cookie.expires > Date.now() / 1000 + 86400 * 170, "Viewer-mode cookie must be persistent");
   assert.equal((await write(context)).status(), 201);
   assert.equal((await write(other)).status(), 403, "Other browser sessions must remain read-only");
   await page.reload();

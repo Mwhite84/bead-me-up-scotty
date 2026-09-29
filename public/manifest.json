@@ -1,0 +1,13 @@
+{
+  "name": "Bead Me Up, Scotty",
+  "short_name": "Scotty",
+  "start_url": "/m",
+  "scope": "/m/",
+  "display": "standalone",
+  "background_color": "#f6f6f8",
+  "theme_color": "#6d5ef0",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

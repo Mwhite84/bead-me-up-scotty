@@ -18,6 +18,7 @@ export function useBeads(projectId: string) {
   return useQuery({
     queryKey: beadsKey(projectId),
     queryFn: () => api.list(projectId),
+    enabled: !!projectId,
     refetchInterval: (q) => q.state.data?.meta.pollIntervalMs ?? 5000,
   });
 }
@@ -65,6 +66,11 @@ function patchCache(
 
 export function useSetStatus() {
   const { projectId } = useApp();
+  return useSetStatusIn(projectId);
+}
+
+/** Optimistic status change for a known project (the mobile shell has no AppProvider). */
+export function useSetStatusIn(projectId: string) {
   const qc = useQueryClient();
   const KEY = beadsKey(projectId);
   return useMutation({
