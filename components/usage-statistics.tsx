@@ -27,7 +27,8 @@ export function UsageActivity() {
   return null;
 }
 
-export function UsageStatisticsSetting() {
+/** The installation-wide usage-statistics preference (server-persisted), shared by desktop and mobile Settings. */
+export function useUsageStatistics() {
   const client = useQueryClient();
   const query = useQuery<Settings>({
     queryKey: ["usage-statistics"],
@@ -51,6 +52,11 @@ export function UsageStatisticsSetting() {
     },
     onError: (e) => toast.error(e.message),
   });
+  return { query, save };
+}
+
+export function UsageStatisticsSetting() {
+  const { query, save } = useUsageStatistics();
   return (
     <div className="flex items-center justify-between gap-4">
       <div>
