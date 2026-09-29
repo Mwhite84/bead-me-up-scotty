@@ -1,5 +1,8 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
+import { AppearanceSync } from "./_components/useAppearance";
 import { RegisterSW } from "./_components/RegisterSW";
+import { Sheets } from "./_components/Sheets";
 import { TabBar } from "./_components/TabBar";
 
 export const metadata: Metadata = {
@@ -21,6 +24,7 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
   return (
     <div className="fixed inset-0 flex h-dvh flex-col bg-background text-text">
       <RegisterSW />
+      <AppearanceSync />
       <main
         className="min-h-0 flex-1 overflow-y-auto"
         style={{ paddingTop: "env(safe-area-inset-top)" }}
@@ -28,6 +32,8 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
         {children}
       </main>
       <TabBar />
+      {/* useSearchParams needs a Suspense boundary at build time. */}
+      <Suspense><Sheets /></Suspense>
     </div>
   );
 }
