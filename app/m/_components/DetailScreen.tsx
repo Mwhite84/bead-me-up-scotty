@@ -170,6 +170,9 @@ export function DetailScreen({ id }: { id: string }) {
         )}
 
         <SectionHead title="Dependencies" count={deps.length}>
+          <Link href={s.href(`/m/board/${encodeURIComponent(bead.id)}/graph`)} className={linkBtn}>
+            Ladder<Svg size={16} color="var(--brand)"><circle cx="6" cy="6" r="2.5" /><circle cx="18" cy="6" r="2.5" /><circle cx="12" cy="18" r="2.5" /><path d="M7.5 8.2l3.2 7.3M16.5 8.2l-3.2 7.3" /></Svg>
+          </Link>
           {!readOnly && (
             <button type="button" className={linkBtn} onClick={() => setPicking(true)}>
               <Svg size={16} stroke={2} color="var(--brand)"><path d="M12 5v14M5 12h14" /></Svg>Add

@@ -230,12 +230,18 @@ function epicLayout(
   return { nodes, edges: styledEdges(beads, true) };
 }
 
-export function GraphView() {
+/**
+ * `focusBead` is the entry point other surfaces (the mobile ladder's Map
+ * toggle) use to land on one bead: it opens spotlighted and centered on that
+ * bead's blocking chains instead of the whole board. Omitted, the desktop
+ * behavior is unchanged.
+ */
+export function GraphView({ focusBead }: { focusBead?: string } = {}) {
   const { beads, openDetail, readOnly } = useApp();
   const [epicId, setEpicId] = React.useState("");
   const [liveOnly, setLiveOnly] = React.useState(false);
-  const [spotlight, setSpotlight] = React.useState(false);
-  const [focusId, setFocusId] = React.useState<string | null>(null);
+  const [spotlight, setSpotlight] = React.useState(!!focusBead);
+  const [focusId, setFocusId] = React.useState<string | null>(focusBead ?? null);
   const activateNode = React.useCallback((id: string) => {
     if (spotlight) setFocusId(id);
     else openDetail(id);
@@ -397,6 +403,10 @@ export function GraphView() {
           onConnect={onConnect}
           onInit={(inst) => {
             rf.current = inst;
+            // After the initial `fitView` has framed everything, tighten onto the
+            // requested bead. rAF so the nodes are measured first.
+            if (focusBead) requestAnimationFrame(() =>
+              inst.fitView({ nodes: [{ id: focusBead }], padding: 1.5, minZoom: 0.02, maxZoom: 1.2, duration: 300 }));
           }}
           minZoom={0.02}
           fitView
