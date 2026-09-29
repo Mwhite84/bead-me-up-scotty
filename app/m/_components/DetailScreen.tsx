@@ -11,6 +11,7 @@ import { Avatar } from "./Avatar";
 import { CommentComposer } from "./CommentComposer";
 import { DepPicker } from "./DepPicker";
 import { DepRow } from "./DepRow";
+import { DispatchSheet } from "./DispatchSheet";
 import { OriginIcon } from "./OriginIcon";
 import { PriorityBadge } from "./PriorityBadge";
 import { headerBtn, ScreenHeader } from "./ScreenHeader";
@@ -54,6 +55,7 @@ export function DetailScreen({ id }: { id: string }) {
   const [title, setTitle] = React.useState("");
   const [desc, setDesc] = React.useState("");
   const [picking, setPicking] = React.useState(false);
+  const [dispatching, setDispatching] = React.useState(false);
 
   const board = s.href("/m/board");
   const open = (beadId: string) => router.push(s.href(`/m/board/${encodeURIComponent(beadId)}`));
@@ -146,6 +148,12 @@ export function DetailScreen({ id }: { id: string }) {
           <h1 className="text-[22px] font-bold leading-[1.25] tracking-[-0.02em] [text-wrap:pretty]">{bead.title}</h1>
         )}
 
+        {!readOnly && s.projectId !== "demo" && (
+          <button type="button" className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-[14px] bg-brand px-[18px] text-[15px] font-semibold text-white" onClick={() => setDispatching(true)}>
+            <Svg size={18} stroke={2}><path d="M5 19c1-4 3-6 5-7M9 11l4 4M14 4c4 0 6 2 6 6-3 0-6 2-8 5l-3-3c3-2 5-5 5-8z" /></Svg>Dispatch
+          </button>
+        )}
+
         <StatusPillRow current={lane} disabled={readOnly || busy} onPick={(st) => actions.setStatus.mutate(st)} />
 
         <div className="grid grid-cols-2 gap-2">
@@ -218,6 +226,8 @@ export function DetailScreen({ id }: { id: string }) {
         actor={s.actor} disabled={readOnly} pending={actions.addComment.isPending}
         onSend={(text) => actions.addComment.mutateAsync(text)}
       />
+
+      {dispatching && <DispatchSheet projectId={s.projectId} beadId={bead.id} onClose={() => setDispatching(false)} />}
 
       {picking && (
         <DepPicker

@@ -111,6 +111,36 @@ export interface FsResponse {
   hasBeads: boolean;
   entries: FsEntry[];
 }
+export interface KreweRun {
+  status?: string;
+  [k: string]: unknown;
+}
+/** GET /api/p/{projectId}/beads/{id}/dispatch — what the Dispatch menu can offer. */
+export interface DispatchStatus {
+  configured: boolean;
+  mcProject: string | null;
+  isEpic: boolean;
+  omgBuild: {
+    command: string;
+    readiness: { ok: boolean; violations: unknown[]; warnings: unknown[] } | null;
+  };
+  krewe: {
+    eligible: boolean | null;
+    reason: string | null;
+    run: KreweRun | null;
+    runUrl: string | null;
+  };
+}
+export type DispatchTarget = "omg-build" | "krewe";
+/** POST result: omg-build returns a session, krewe returns a run. */
+export interface DispatchResult {
+  sessionName?: string;
+  warning?: string;
+  command?: string;
+  run?: KreweRun;
+  runUrl?: string;
+}
+
 // Self-update wire types live in a shared, non-server-only module so the client
 // and lib/self-update.ts can't drift apart. Re-exported here for existing callers.
 export type { UpdateStatus, UpdateStep, UpdateResult } from "./update-types";
@@ -197,6 +227,13 @@ export const api = {
     }),
   archive: (projectId: string, id: string) =>
     request<Bead>(`${base(projectId)}/beads/${enc(id)}/archive`, { method: "POST" }),
+  dispatchStatus: (projectId: string, id: string) =>
+    request<DispatchStatus>(`${base(projectId)}/beads/${enc(id)}/dispatch`),
+  dispatch: (projectId: string, id: string, target: DispatchTarget) =>
+    request<DispatchResult>(`${base(projectId)}/beads/${enc(id)}/dispatch`, {
+      method: "POST",
+      body: JSON.stringify({ target }),
+    }),
   doctor: (projectId: string) => request<DoctorResponse>(`${base(projectId)}/doctor`),
 
   activity: (projectId: string) => request<ActivityResponse>(`${base(projectId)}/activity`),

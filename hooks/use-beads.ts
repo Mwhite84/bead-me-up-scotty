@@ -6,7 +6,7 @@ import {
 } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { toastError } from "@/components/error-toast";
-import { api, type BeadsResponse } from "@/lib/api-client";
+import { api, type BeadsResponse, type DispatchResult, type DispatchTarget } from "@/lib/api-client";
 import type { Bead, CreateInput, UpdateInput, DepType } from "@/lib/schema";
 import { useApp } from "@/components/app-context";
 
@@ -234,6 +234,47 @@ export function useArchiveBead() {
       (id) => `Archived ${id} · bd close + label`,
       qc,
       beadsKey(projectId),
+    ),
+  );
+}
+
+const TERMINAL_RUN = new Set(["completed", "failed", "cancelled", "terminated"]);
+export const dispatchKey = (projectId: string, id: string | null) =>
+  ["dispatch", projectId, id] as const;
+
+/** Dispatch options + Krewe run status for a bead; polls while a run is live. */
+export function useDispatchStatus(id: string | null, enabled: boolean) {
+  return useDispatchStatusFor(useApp().projectId, id, enabled);
+}
+
+/** Same, with an explicit project: the mobile shell has no AppProvider, so it can't use useApp. */
+export function useDispatchStatusFor(projectId: string, id: string | null, enabled: boolean) {
+  return useQuery({
+    queryKey: dispatchKey(projectId, id),
+    queryFn: () => api.dispatchStatus(projectId, id as string),
+    enabled: enabled && !!id,
+    refetchInterval: (q) => {
+      const s = q.state.data?.krewe.run?.status;
+      return s && !TERMINAL_RUN.has(s) ? 15000 : false;
+    },
+  });
+}
+
+export function useDispatch() {
+  return useDispatchFor(useApp().projectId);
+}
+
+export function useDispatchFor(projectId: string) {
+  const qc = useQueryClient();
+  return useMutation(
+    mutationToast<{ id: string; target: DispatchTarget }, DispatchResult>(
+      ({ id, target }) => api.dispatch(projectId, id, target),
+      (a, res) =>
+        a.target === "omg-build"
+          ? `Started omg-build session ${res.sessionName}${res.warning ? ` · ${res.warning}` : ""}`
+          : "Krewe run started",
+      qc,
+      ["dispatch", projectId],
     ),
   );
 }
