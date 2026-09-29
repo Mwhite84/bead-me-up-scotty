@@ -244,7 +244,11 @@ export const dispatchKey = (projectId: string, id: string | null) =>
 
 /** Dispatch options + Krewe run status for a bead; polls while a run is live. */
 export function useDispatchStatus(id: string | null, enabled: boolean) {
-  const { projectId } = useApp();
+  return useDispatchStatusFor(useApp().projectId, id, enabled);
+}
+
+/** Same, with an explicit project: the mobile shell has no AppProvider, so it can't use useApp. */
+export function useDispatchStatusFor(projectId: string, id: string | null, enabled: boolean) {
   return useQuery({
     queryKey: dispatchKey(projectId, id),
     queryFn: () => api.dispatchStatus(projectId, id as string),
@@ -257,7 +261,10 @@ export function useDispatchStatus(id: string | null, enabled: boolean) {
 }
 
 export function useDispatch() {
-  const { projectId } = useApp();
+  return useDispatchFor(useApp().projectId);
+}
+
+export function useDispatchFor(projectId: string) {
   const qc = useQueryClient();
   return useMutation(
     mutationToast<{ id: string; target: DispatchTarget }, DispatchResult>(
