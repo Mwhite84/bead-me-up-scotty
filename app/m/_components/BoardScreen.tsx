@@ -5,6 +5,7 @@ import * as React from "react";
 import { useBeads, useSetStatusIn } from "@/hooks/use-beads";
 import { COLUMN_ORDER, colOf, sortBoardCards } from "@/lib/board-columns";
 import { parentOf } from "@/lib/beads-view";
+import { beadOrigin } from "@/lib/attribution";
 import { ARCHIVED_LABEL } from "@/lib/filters";
 import type { Bead } from "@/lib/schema";
 import { Card } from "./Card";
@@ -84,7 +85,7 @@ export function BoardScreen() {
             return (
               <SwipeCard key={b.id} id={b.id} lane={lane} disabled={readOnly} onOpen={() => open(b.id)}
                 onCommit={(id, status) => setStatus.mutate({ id, status })}>
-                <Card bead={b} status={lane} epic={parent?.issue_type === "epic" ? parent.title : undefined} />
+                <Card bead={b} status={lane} origin={beadOrigin(b, data?.meta.humanAllowlist ?? [])} epic={parent?.issue_type === "epic" ? parent.title : undefined} />
               </SwipeCard>
             );
           })}
