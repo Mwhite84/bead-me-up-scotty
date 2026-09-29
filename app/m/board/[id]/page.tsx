@@ -1,5 +1,8 @@
-// Stub route so Board card taps resolve; the Detail bead replaces this page.
-export default async function BeadDetailStub({ params }: { params: Promise<{ id: string }> }) {
+import { Suspense } from "react";
+import { DetailScreen } from "../../_components/DetailScreen";
+
+// useSearchParams (project selection) needs a Suspense boundary at build time.
+export default async function BeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  return <div className="p-5 font-mono text-sm text-text-2">{decodeURIComponent(id)}</div>;
+  return <Suspense><DetailScreen id={decodeURIComponent(id)} /></Suspense>;
 }

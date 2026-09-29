@@ -1,5 +1,6 @@
 import type { Bead } from "@/lib/schema";
 import { Avatar } from "./Avatar";
+import { OriginIcon } from "./OriginIcon";
 import { PriorityBadge } from "./PriorityBadge";
 import { StatusDot, statusKey, type StatusKey } from "./StatusChip";
 import { Svg } from "./Svg";
@@ -29,11 +30,7 @@ export function Card({
         <span className="whitespace-nowrap font-mono text-xs text-text-2">{bead.id}</span>
         <span className="flex-1" />
         <PriorityBadge priority={bead.priority} />
-        {origin === "agent" ? (
-          <Svg size={14} color="var(--brand)"><rect x="4" y="8" width="16" height="12" rx="3" /><path d="M12 8V5" /><circle cx="12" cy="4" r="1.2" fill="currentColor" stroke="none" /><circle cx="9" cy="14" r="1.3" fill="currentColor" stroke="none" /><circle cx="15" cy="14" r="1.3" fill="currentColor" stroke="none" /></Svg>
-        ) : origin === "human" ? (
-          <Svg size={14} color="var(--text-3)"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" /></Svg>
-        ) : null}
+        {origin && <OriginIcon origin={origin} />}
       </div>
       <div className="text-[15px] font-semibold leading-[1.3] tracking-[-0.01em] text-text [text-wrap:pretty]">
         {bead.title}
