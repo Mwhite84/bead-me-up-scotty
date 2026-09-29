@@ -27,6 +27,8 @@ const TABS = [
 export function TabBar() {
   const path = usePathname();
   const readOnly = useViewerMode().data?.readOnly ?? false;
+  // Detail and Comments are full-screen pages (composer pinned to the bottom, no tab bar).
+  if (/^\/m\/board\/[^/]+/.test(path)) return null;
   return (
     <nav
       aria-label="Primary"
