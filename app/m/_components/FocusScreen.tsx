@@ -9,21 +9,13 @@ import { AssigneeGroupHeader } from "./AssigneeGroupHeader";
 import { FOCUS_COLOR, FocusRow, type FocusKind } from "./FocusRow";
 import { ProjectPill } from "./ProjectPill";
 import { ReadOnlyBanner } from "./ReadOnlyBanner";
+import { Segment, SegmentGroup } from "./Segment";
 import { Svg } from "./Svg";
 import { useMobileProject } from "./useMobileProject";
 
 const PULL_TRIGGER = 56;
 const POLL_MS = 5000;
 const KIND_OF: Record<string, FocusKind> = { flight: "flight", blocked: "blocked", next: "next" };
-
-const Segment = ({ on, onClick, children }: { on: boolean; onClick: () => void; children: React.ReactNode }) => (
-  <button
-    type="button" aria-pressed={on} onClick={onClick}
-    className={`inline-flex h-[30px] items-center rounded-full px-3 text-xs ${on ? "bg-brand-weak font-semibold text-brand-2" : "font-medium text-text-2"}`}
-  >
-    {children}
-  </button>
-);
 
 export function FocusScreen() {
   const { projectId, name } = useMobileProject();
@@ -81,10 +73,10 @@ export function FocusScreen() {
         <div className="flex min-h-11 items-center gap-1.5">
           <ProjectPill name={name ?? "…"} />
           <span className="flex-1" />
-          <span className="inline-flex rounded-full border border-border bg-surface p-[3px]">
+          <SegmentGroup>
             <Segment on={!grouped} onClick={() => setGrouped(false)}>All</Segment>
             <Segment on={grouped} onClick={() => setGrouped(true)}>By assignee</Segment>
-          </span>
+          </SegmentGroup>
         </div>
         <div className="flex items-baseline gap-2.5">
           <h1 className="text-[30px] font-bold leading-[1.1] tracking-[-0.02em]">Focus</h1>
