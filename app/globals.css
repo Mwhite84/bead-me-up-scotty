@@ -80,6 +80,22 @@
   --shadow-lg: 0 12px 32px -8px rgba(20, 20, 40, 0.18), 0 4px 12px -4px rgba(20, 20, 40, 0.1);
   --drawer: #ffffff;
 
+  /* Mobile (/m) status + priority palette, ported from the mobile mockups.
+     Theme-independent on purpose: status colors carry meaning, not chrome. */
+  --st-backlog: #64748b;
+  --st-ready: #3b82f6;
+  --st-progress: #d97706;
+  --st-blocked: #ef4444;
+  --st-done: #16a34a;
+  --pri-critical: #dc2626;
+  --pri-critical-bg: rgba(239, 68, 68, 0.14);
+  --pri-high: #ea580c;
+  --pri-high-bg: rgba(249, 115, 22, 0.14);
+  --pri-medium: #a16207;
+  --pri-medium-bg: rgba(234, 179, 8, 0.14);
+  --av-orange: #f97316;
+  --av-violet: #8b5cf6;
+
   /* shadcn semantic → mapped to our palette */
   --background: var(--bg);
   --foreground: var(--text);
