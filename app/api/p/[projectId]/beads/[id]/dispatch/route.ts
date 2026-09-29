@@ -82,6 +82,11 @@ export async function GET(_req: Request, { params }: Ctx) {
 }
 
 export async function POST(req: Request, { params }: Ctx) {
+  // A non-JSON content-type is a CORS "simple request" (no preflight), so any
+  // web page could launch an agent session here. Requiring JSON forces a preflight we never answer.
+  if (!req.headers.get("content-type")?.toLowerCase().startsWith("application/json")) {
+    return ok({ error: "Content-Type must be application/json", code: "unsupported_media_type" }, 415);
+  }
   try {
     const { projectId, id } = await params;
     if (projectId === DEMO_PROJECT.id) return demo();
