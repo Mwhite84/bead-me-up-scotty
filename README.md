@@ -161,6 +161,28 @@ npm run dev            # http://localhost:3000
 Set the human actor / allowlist, repo path, and theme in **Settings** (stored
 under your OS config dir, not in beads).
 
+### Dispatch via Mission Control
+
+Scotty can dispatch a bead or epic to `omg-build` or krewe by calling Mission
+Control's (MC) service API server-to-server, via
+`/api/p/<project>/beads/<id>/dispatch`. This needs an MC with service tokens
+enabled. Mint one and store it where Scotty looks by default:
+
+```bash
+cd <mc>/app && npx tsx scripts/service-token.ts mint bmus > ~/.config/bead-me-up-scotty/mc-service-token && chmod 600 ~/.config/bead-me-up-scotty/mc-service-token
+```
+
+| Variable | Default |
+| --- | --- |
+| `MC_BASE_URL` | `http://127.0.0.1:3000` |
+| `MC_SERVICE_TOKEN` | the token itself; wins over the file |
+| `MC_SERVICE_TOKEN_FILE` | `~/.config/bead-me-up-scotty/mc-service-token` |
+
+MC identifies a project by the Dolt database name in `.beads/metadata.json`
+(`dolt_database`). Krewe dispatch also needs the project listed in MC's
+`config/krewe-projects.json`; otherwise the route reports it as not eligible.
+The token is only ever sent to `MC_BASE_URL` and is never logged.
+
 ### Focus view
 
 **Focus** is an optional view for current work: In flight, Blocked, and Next up
