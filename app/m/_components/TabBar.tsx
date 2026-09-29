@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useViewerMode } from "@/hooks/use-viewer-mode";
 import { Svg } from "./Svg";
 
 const TABS = [
@@ -25,6 +26,7 @@ const TABS = [
 
 export function TabBar() {
   const path = usePathname();
+  const readOnly = useViewerMode().data?.readOnly ?? false;
   return (
     <nav
       aria-label="Primary"
@@ -37,6 +39,14 @@ export function TabBar() {
           // reads ?sheet=create; the tap target is wired now.
           return (
             <span key="new" className="flex flex-1 items-start justify-center">
+              {readOnly ? (
+                <span
+                  role="img" aria-label="Creating beads is off in read-only mode"
+                  className="-mt-[22px] inline-flex size-14 items-center justify-center rounded-full border border-border-strong bg-surface-3"
+                >
+                  <Svg size={22} color="var(--text-3)"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></Svg>
+                </span>
+              ) : (
               <Link
                 href="?sheet=create"
                 scroll={false}
@@ -45,6 +55,7 @@ export function TabBar() {
               >
                 <Svg size={26} stroke={2.25} color="#ffffff"><path d="M12 5v14M5 12h14" /></Svg>
               </Link>
+              )}
             </span>
           );
         }

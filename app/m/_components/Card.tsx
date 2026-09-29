@@ -61,7 +61,7 @@ export function Card({
           <Count n={comments}><path d="M20 15a2 2 0 0 1-2 2H8l-4 4V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z" /></Count>
         )}
         {epic && (
-          <span className="whitespace-nowrap rounded-md bg-brand-weak px-[7px] py-[3px] text-[11px] text-brand">{epic}</span>
+          <span className="min-w-0 max-w-[45%] truncate whitespace-nowrap rounded-md bg-brand-weak px-[7px] py-[3px] text-[11px] text-brand">{epic}</span>
         )}
       </div>
     </div>
