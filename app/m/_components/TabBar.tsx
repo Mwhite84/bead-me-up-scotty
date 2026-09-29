@@ -28,7 +28,9 @@ export function TabBar() {
   const path = usePathname();
   const readOnly = useViewerMode().data?.readOnly ?? false;
   // Detail and Comments are full-screen pages (composer pinned to the bottom, no tab bar).
-  if (/^\/m\/board\/[^/]+/.test(path)) return null;
+  // The ladder (/m/board/<id>/graph) is the Graph tab's own sub-route, so it keeps the bar.
+  const isGraph = path === "/m/graph" || /^\/m\/board\/[^/]+\/graph\/?$/.test(path);
+  if (!isGraph && /^\/m\/board\/[^/]+/.test(path)) return null;
   return (
     <nav
       aria-label="Primary"
@@ -61,7 +63,7 @@ export function TabBar() {
             </span>
           );
         }
-        const active = path.startsWith(t.href);
+        const active = t.href === "/m/graph" ? isGraph : t.href === "/m/board" ? !isGraph && path.startsWith(t.href) : path.startsWith(t.href);
         return (
           <Link
             key={t.href}

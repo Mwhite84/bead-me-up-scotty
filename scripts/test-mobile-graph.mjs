@@ -115,6 +115,20 @@ try {
     "f1 depends on u-open, so it re-centers as downstream",
   );
 
+  // --- the Graph tab (/m/graph) lands on a default bead and keeps the tab bar ---
+  await page.goto(`${base}/m/graph?project=demo`);
+  await page.getByText("Upstream · must close first").waitFor();
+  // f1 is the only blocked bead (waits on open u-open), so it is the default pick.
+  assert.ok((await ladderOrder()).includes("card:f1"), "default pick is the blocked bead");
+  const graphTab = page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Graph" });
+  assert.equal(await graphTab.getAttribute("aria-current"), "page", "Graph tab is active on /m/graph");
+  await page.getByRole("button", { name: /u-open/ }).click();
+  await page.waitForURL(/\/m\/board\/u-open\/graph/);
+  await page.getByText("bd adapter execFile envelope").waitFor();
+  assert.equal(await graphTab.getAttribute("aria-current"), "page", "tab bar and Graph highlight survive re-centering");
+  const boardTab = page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Board" });
+  assert.equal(await boardTab.getAttribute("aria-current"), null, "Board tab is not active on the ladder");
+
   // --- Map toggle opens the existing desktop React Flow canvas on the same bead ---
   await page.goto(`${base}/m/board/f1/graph?project=demo`);
   await page.getByRole("button", { name: "Map" }).click();
