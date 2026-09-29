@@ -58,23 +58,37 @@ export async function GET(_req: Request, { params }: Ctx) {
     const eid = encodeURIComponent(id);
     const scope = isEpic ? "epic" : "bead";
     const runPath = isEpic ? `/api/queue/${eid}/krewe-epic-run?${q}` : `/api/queue/${eid}/krewe-run?${q}`;
-    const [readiness, preview, run] = await Promise.all([
+    // Each call settles independently: a failing advisory call must not take down the
+    // omg-build option, which needs none of them.
+    const results = await Promise.allSettled([
       mcFetch(`/api/queue/${eid}/build-readiness?${q}&scope=${scope}`),
-      mcFetch(`/api/queue/${eid}/krewe-preview?${q}`).then(
-        () => ({ eligible: true, reason: null as string | null }),
-        (e) => {
-          if (e instanceof McError && e.status === 404) return { eligible: false, reason: e.message };
-          throw e;
-        },
-      ),
-      mcFetch<Run>(runPath),
+      mcFetch(`/api/queue/${eid}/krewe-preview?${q}`),
+      mcFetch<Run | null>(runPath),
     ]);
+    const [readinessR, previewR, runR] = results;
+    const rejected = results.flatMap((r) => (r.status === "rejected" ? [r.reason] : []));
+    const fatal = rejected.find(
+      (e) => e instanceof McError && (e.code === "mc_unreachable" || e.code === "mc_not_configured"),
+    );
+    // preview 404 means "ineligible", not a failure
+    const previewIneligible =
+      previewR.status === "rejected" && previewR.reason instanceof McError && previewR.reason.status === 404;
+    const failures = rejected.length - (previewIneligible ? 1 : 0);
+    if (fatal || failures === results.length) throw fatal ?? rejected[0];
+
+    const errMsg = (e: unknown) => (e instanceof Error ? e.message : String(e));
+    const run = runR.status === "fulfilled" ? runR.value : null;
     return ok({
       configured: true,
       mcProject,
       isEpic,
-      omgBuild: { command, readiness },
-      krewe: { ...preview, run: run.run, runUrl: run.runUrl ?? null },
+      omgBuild: { command, readiness: readinessR.status === "fulfilled" ? (readinessR.value ?? null) : null },
+      krewe: {
+        eligible: previewR.status === "fulfilled" ? true : previewIneligible ? false : null,
+        reason: previewR.status === "rejected" ? errMsg(previewR.reason) : null,
+        run: run?.run ?? null,
+        runUrl: run?.runUrl ?? null,
+      },
     });
   } catch (e) {
     return failDispatch(e);
