@@ -45,7 +45,16 @@ export function useBeadScreen(id: string) {
       ...opts,
     }),
     archive: useMutation({ mutationFn: () => api.archive(projectId, id), ...opts }),
-    remove: useMutation({ mutationFn: () => api.remove(projectId, id), ...opts }),
+    // The bead is gone: drop its detail query (a refetch would 404 and retry ~7s, holding the
+    // awaited onSuccess) and refresh the list without awaiting, so the caller navigates at once.
+    remove: useMutation({
+      mutationFn: () => api.remove(projectId, id),
+      onSuccess: () => {
+        qc.removeQueries({ queryKey: beadKey(projectId, id) });
+        void qc.invalidateQueries({ queryKey: beadsKey(projectId) });
+      },
+      onError: toastError,
+    }),
     addComment: useMutation({ mutationFn: (text: string) => api.addComment(projectId, id, text), ...opts }),
   };
 
