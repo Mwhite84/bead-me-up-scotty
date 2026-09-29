@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/sheet";
 import { Icon, typeIconName } from "@/components/icons";
 import { OriginBadge, PriorityChip } from "@/components/board/bead-card";
+import { DispatchMenu } from "@/components/dispatch-menu";
 import { CopyableId } from "@/components/copyable-id";
 import { useApp, type DetailAction } from "@/components/app-context";
 import { useImageDrop } from "@/hooks/use-image-drop";
@@ -384,6 +385,7 @@ function DrawerBody({
         <CopyableId id={bead.id} className="font-mono text-[13px] text-[var(--text-2)]" />
         <StatusChip status={bead.status} />
         <span className="flex-1" />
+        {!readOnly && projectId !== "demo" && <DispatchMenu bead={bead} />}
         <IconBtn title="Copy link" onClick={copyLink}>
           <Icon name="link" size={15} />
         </IconBtn>
