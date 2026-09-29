@@ -51,7 +51,7 @@ export function ReadOnlyBanner() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent data-viewer-dialog>
         <DialogTitle>Read Only Mode</DialogTitle>
-        <DialogDescription>Editing is disabled for this browser session. Changes here apply to tabs sharing this session, not other browsers.</DialogDescription>
+        <DialogDescription>Editing is disabled in this browser and stays off across reloads and restarts. Other browsers are unaffected.</DialogDescription>
         <fieldset className="flex gap-4">
           <legend className="mb-2 font-medium">Banner size</legend>
           {["small", "large"].map((size) => <label key={size} className="flex items-center gap-2 capitalize">
@@ -79,7 +79,7 @@ export function ViewerModeSetting() {
   const { data, change, error } = useViewerMode();
   return <section className="mb-5 rounded-xl border border-border p-4">
     <h2 className="mb-2 font-semibold">Read-only mode</h2>
-    <p className="mb-3 text-sm text-muted-foreground">Prevent edits while you watch progress. This setting applies to your current browser session.</p>
+    <p className="mb-3 text-sm text-muted-foreground">Prevent edits while you watch progress. This setting is remembered in this browser across reloads and restarts.</p>
     <button disabled={!data || change.isPending} className="rounded-md border px-3 py-2 text-sm disabled:opacity-50" onClick={() => change.mutate(!data?.readOnly)}>
       {data?.readOnly ? "Disable read-only mode" : "Enable read-only mode"}
     </button>

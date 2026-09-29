@@ -136,7 +136,7 @@ export function SettingsScreen() {
               }}
             />
             <Toggle
-              label="Read-only mode" sub="This browser session only" checked={readOnly}
+              label="Read-only mode" sub="Survives reload" checked={readOnly}
               disabled={!viewer.data || viewer.change.isPending} onChange={(on) => viewer.change.mutate(on)}
             />
           </Group>

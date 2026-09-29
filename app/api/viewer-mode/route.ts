@@ -27,7 +27,9 @@ export async function PUT(req: Request) {
     res.cookies.set(VIEWER_MODE_COOKIE, readOnly ? "read-only" : "editing", {
       httpOnly: true, sameSite: "strict", path: "/",
       secure: new URL(req.url).protocol === "https:",
-      // No expires/maxAge: mode is session-scoped, unlike banner appearance.
+      // Persistent (180d): survives browser/PWA restarts. "editing" is kept as an
+      // explicit override of the SCOTTY_READ_ONLY default, so it persists too.
+      maxAge: 60 * 60 * 24 * 180,
     });
     return res;
   } catch (e) { return fail(e); }

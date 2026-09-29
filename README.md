@@ -181,9 +181,9 @@ The slim **Read Only Mode** banner stays above the project workspace. Click it
 to keep or disable the mode, choose a small or large banner, or pick its background
 and text colors. Appearance changes are saved automatically in this browser.
 
-The mode applies to the current browser session, including its other tabs. A
-session cookie preserves it through reloads; browser session restoration may
-also restore that cookie. Other browser sessions are unaffected. Settings lets
+The mode applies to this browser, including its other tabs. A 180-day cookie
+preserves it through reloads and browser restarts. Other browsers are
+unaffected. Settings lets
 you enable it again after dismissing the banner.
 
 Set `SCOTTY_READ_ONLY=1` (or `true`) when launching Scotty to make read-only the
