@@ -1,35 +1,56 @@
-// Isolated demo server (see scripts/test-read-only.mjs):
-// XDG_CONFIG_HOME=/tmp/scotty-dispatch-test POSTHOG_KEY='' BEADS_DEMO=1 npm run start -- --port 3198
-// SCOTTY_TEST_URL=http://localhost:3198 node scripts/test-dispatch-ui.mjs
+// Dispatch button visibility, desktop drawer and mobile detail. Needs a build; starts its own app
+// (fixture project with one bead + demo project):
+// npm run build && node scripts/test-dispatch-ui.mjs
 import assert from "node:assert/strict";
 import { chromium } from "playwright";
-const base = process.env.SCOTTY_TEST_URL;
-assert.ok(base, "Set SCOTTY_TEST_URL to an isolated demo server");
+import { startFixture } from "./dispatch-fixture.mjs";
+
+const fx = await startFixture();
+const base = fx.base;
 const browser = await chromium.launch();
 try {
-  const context = await browser.newContext();
+  const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const page = await context.newPage();
   page.setDefaultTimeout(10000);
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
+  const setReadOnly = async (readOnly) =>
+    assert.equal((await context.request.put(`${base}/api/viewer-mode`, { data: { readOnly } })).status(), 200);
+
+  // Desktop drawer
   const drawer = page.getByRole("dialog");
-  const openFirst = async () => {
-    await page.goto(`${base}/p/demo`);
+  const openDesktop = async (project) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto(`${base}/p/${project}`);
     await page.getByRole("button", { name: "Board", exact: true }).click();
     await page.locator("article").first().click();
     // The header is rendered once Copy link is there, so a missing Dispatch is real.
     await drawer.getByTitle("Copy link", { exact: true }).waitFor();
+    return drawer.getByTitle("Dispatch", { exact: true }).count();
   };
+  await setReadOnly(false);
+  assert.equal(await openDesktop("demo"), 0, "desktop: hidden on the demo project");
+  assert.equal(await openDesktop(fx.projectId), 1, "desktop: shown on a writable real project");
+  await setReadOnly(true);
+  assert.equal(await openDesktop("demo"), 0, "desktop: hidden in read-only mode (demo)");
+  assert.equal(await openDesktop(fx.projectId), 0, "desktop: hidden in read-only mode (real project)");
 
-  // Demo project, writable: no Dispatch button.
-  assert.equal((await context.request.put(`${base}/api/viewer-mode`, { data: { readOnly: false } })).status(), 200);
-  await openFirst();
-  assert.equal(await drawer.getByTitle("Dispatch", { exact: true }).count(), 0, "hidden on the demo project");
+  // Mobile detail screen
+  const demoId = (await (await context.request.get(`${base}/api/p/demo/beads`)).json()).beads[0]?.id;
+  assert.ok(demoId, "need a demo bead id");
+  const openMobile = async (project, id) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`${base}/m/board/${encodeURIComponent(id)}?project=${project}`);
+    await page.locator("h1").first().waitFor();
+    return page.getByRole("button", { name: "Dispatch", exact: true }).count();
+  };
+  await setReadOnly(false);
+  assert.equal(await openMobile("demo", demoId), 0, "mobile: hidden on the demo project");
+  assert.equal(await openMobile(fx.projectId, fx.beadId), 1, "mobile: shown on a writable real project");
+  await setReadOnly(true);
+  assert.equal(await openMobile("demo", demoId), 0, "mobile: hidden in read-only mode (demo)");
+  assert.equal(await openMobile(fx.projectId, fx.beadId), 0, "mobile: hidden in read-only mode (real project)");
 
-  // Read-only on: still absent.
-  assert.equal((await context.request.put(`${base}/api/viewer-mode`, { data: { readOnly: true } })).status(), 200);
-  await openFirst();
-  assert.equal(await drawer.getByTitle("Dispatch", { exact: true }).count(), 0, "hidden in read-only mode");
   assert.deepEqual(errors, []);
-  console.log("PASS: Dispatch button absent on demo project and in read-only mode");
-} finally { await browser.close(); }
+  console.log("PASS: Dispatch button hidden on demo and read-only, shown on writable real project (desktop and mobile)");
+} finally { await browser.close(); await fx.close(); }
